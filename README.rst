@@ -27,7 +27,6 @@ detector, but it is not intended as a plug-and-play software.
 
 First, install the ``cloudynight`` module:
 
-  >>> cd /cloudynight
   >>> python setup.py install
 
 and run the provided example scripts to get familiar with the module.
