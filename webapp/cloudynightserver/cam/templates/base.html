@@ -1,0 +1,326 @@
+<!-- Licensed under a 3-clause BSD style license - see LICENSE.rst -->
+
+<!-- This file is part of -->
+<!-- cloudynight (c) Michael Mommert (mommermiscience@gmail.com), 2020 -->
+
+<!-- This file can be copied directly into your Django project. -->
+
+<html>
+  <head>
+    <title>Cloudynight - The All-sky Camera Cloud Detector</title>
+    <meta name="author" content="Michael Mommert, 2020">
+    <link href='//fonts.googleapis.com/css?family=Merriweather&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js">
+    </script>
+    <link href="http://cdn.pydata.org/bokeh/release/bokeh-1.3.4.min.css" rel="stylesheet" type="text/css">
+    <script src="http://cdn.pydata.org/bokeh/release/bokeh-1.3.4.min.js"></script>
+    <style>
+       /* adopted from https://github.com/russmaxdesign/example-layout-two-full */
+
+       /* -----------------------
+       Base styles
+       ------------------------*/
+
+       body
+       {
+	       margin: 0;
+	       padding: 0;
+	       color: #fff;
+	       background-color: #000;
+	       font: 1em/1.2 "Merriweather", Helvetica, Arial, Geneva, sans-serif;
+       }
+
+       h1,h2,h3,h4,h5,h6
+       {
+	       margin: 0 0 .5em;
+	       font-weight: 500;
+	       line-height: 1.1;
+       }
+
+       h1 { font-size: 2.25em; } /* 36px */
+       h2 { font-size: 1.75em; } /* 28px */
+       h3 { font-size: 1.375em; } /* 22px */
+       h4 { font-size: 1.125em; } /* 18px */
+       h5 { font-size: 1em; } /* 16px */
+       h6 { font-size: .875em; } /* 14px */
+
+       p
+       {
+	       margin: 0 0 1.5em;
+	       line-height: 1.5;
+       }
+
+       blockquote
+       {
+	       padding: 1em 2em;
+	       margin: 0 0 2em;
+	       border-left: 5px solid #eee;
+       }
+
+       hr
+       {
+	       height: 0;
+	       margin-top: 1em;
+	       margin-bottom: 2em;
+	       border: 0;
+	       border-top: 1px solid #ddd;
+       }
+
+       table
+       {
+	       background-color: transparent;
+	       border-spacing: 0;
+	       border-collapse: collapse;
+	       border-top: 1px solid #ddd;
+       }
+
+       th, td
+       {
+	       padding: .5em 1em;
+	       vertical-align: top;
+	       text-align: left;
+	       border-bottom: 1px solid #ddd;
+       }
+
+
+       a:link { color: grey; }
+       a:visited { color: darkgrey; }
+       a:focus { color: white; }
+       a:hover { color: white; }
+       a:active { color: white; }
+
+       /* -----------------------
+       Layout styles
+       ------------------------*/
+
+       .container
+       {
+	       max-width: 70em;
+	       margin: 0 auto;
+       }
+
+       .header
+       {
+	       color: #fff;
+	       background: #333;
+	       padding: 1em 1.25em;
+       }
+
+       .header-heading { margin: 0; }
+
+       .nav-bar
+       {
+	   background: #444;
+	   padding: 0;
+       }
+
+       .content
+       {
+	       overflow: hidden;
+	       padding: 1em 1.25em;
+	       background-color: #000;
+       }
+
+       .main, .aside
+       {
+	   margin-bottom: 1em;
+       }
+
+       .footer
+       {
+	       color: #ddd;
+	       background: #333;
+	       padding: 1em 1.25em;
+	       text-align: center;
+       }
+
+       /* -----------------------
+       Nav
+       ------------------------*/
+
+       .nav
+       {
+	       margin: 0;
+	       padding: 0;
+	       list-style: none;
+       }
+
+       .nav li
+       {
+	       display: inline;
+	       margin: 0;
+       }
+
+       .nav a
+       {
+	       display: block;
+	       padding: .7em 1.25em;
+	       color: #aaa;
+	       text-decoration: none;
+	       border-bottom: 1px solid gray;
+       }
+
+       .nav a:link { color: #aaa; }
+       .nav a:visited { color: #999; }
+
+       .nav a:focus
+       {
+	       color: #444;
+	       background-color: #aaa;
+       }
+
+       .nav a:hover
+       {
+	       color: #444;
+	       background-color: #aaa;
+       }
+
+       .nav a:active
+       {
+	       color: #444;
+	       background-color: #aaa;
+       }
+
+       /* -----------------------
+       Single styles
+       ------------------------*/
+
+       .img-responsive { max-width: 100%; }
+
+       .btn
+       {
+	       color: #fff !important;
+	       background-color: royalblue;
+	       border-color: #222;
+	       display: inline-block;
+	       padding: .5em 1em;
+	       margin-bottom: 0;
+	       font-weight: 400;
+	       line-height: 1.2;
+	       text-align: center;
+	       white-space: nowrap;
+	       vertical-align: middle;
+	       cursor: pointer;
+	       border: 1px solid transparent;
+	       border-radius: .2em;
+	       text-decoration: none;
+       }
+
+       .btn:hover
+       {
+	       color: #fff !important;
+	       background-color: green;
+       }
+
+       .btn:focus
+       {
+	       color: #fff !important;
+	       background-color: black;
+       }
+
+       .btn:active
+       {
+	       color: #fff !important;
+	       background-color: red;
+       }
+
+       .table
+       {
+	       width: 100%;
+	       max-width: 100%;
+	       margin-bottom: 20px;
+       }
+
+       .list-unstyled
+       {
+	       padding-left: 0;
+	       list-style: none;
+       }
+
+       .list-inline
+       {
+	       padding-left: 0;
+	       margin-left: -5px;
+	       list-style: none;
+       }
+
+       .list-inline > li
+       {
+	       display: inline-block;
+	       padding-right: 5px;
+	       padding-left: 5px;
+       }
+
+
+       /* -----------------------
+       Wide styles
+       ------------------------*/
+
+       @media (min-width: 55em)
+       {
+	       .header { padding: 1.5em 3em; }
+	       .nav-bar { padding: 1em 3em; }
+	       .content { padding: 2em 3em; }
+
+	       .main
+	       {
+		       float: left;
+		       width: 65%;
+		       margin-right: 5%;
+		       margin-bottom: 1em;
+	       }
+
+	       .aside
+	       {
+		       float: left;
+		       width: 30%;
+		       margin-bottom: 1em;
+	       }
+
+	       .footer { padding: 2em 3em; }
+
+	       .nav li
+	       {
+		       display: inline;
+		       margin: 0 1em 0 0;
+	       }
+
+	       .nav a
+	       {
+		       display: inline;
+		       padding: 0;
+		       border-bottom: 0;
+	       }
+       }
+
+    </style>
+
+  </head>
+  <body>
+
+    <div class="header">
+      <div class="container">
+	<h1 class="header-heading">Cloudynight - The All-sky Camera Cloud Detector</h1>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <div class="container">
+	<ul class="nav">
+	  <li><a href="/">Introduction</a></li>
+	  <li><a href="/label">Label Random Data</a></li>
+	  <li><a href="/check">Check Random Prediction</a></li>
+	  <li><a href="/dashboard">Data Dashboard</a></li>
+	</ul>
+      </div>
+    </div>
+    
+    {% block content %}
+    {% endblock %}
+
+    <div class="footer">
+      <div class="container">
+	<p align="center">&copy; Michael Mommert @ Lowell Observatory, 2020</br>
+      </div>
+    </div>
+  </body>
+</html>

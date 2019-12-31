@@ -1,0 +1,199 @@
+<!-- Licensed under a 3-clause BSD style license - see LICENSE.rst -->
+
+<!-- This file is part of -->
+<!-- cloudynight (c) Michael Mommert (mommermiscience@gmail.com), 2020 -->
+
+<!-- This file can be copied directly into your Django project. -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<script>
+  <!-- list of subregions in which clouds have been identified -->
+  var subregions_marked = {{ cloudy|safe }};
+  var subregions_displayed = {{ cloudy|safe }};  
+  var display_subregions = true;
+  
+  var n_subregions = {{ n_subregions }};  <!-- total number of subregions -->
+  var polygons_x = {{ polygons_x|safe }};  <!-- x coordinates of all polygons -->
+  var polygons_y = {{ polygons_y|safe }};  <!-- y coordinates of all polygons -->
+
+  var cnvs = null;
+  var ctx;
+  var img;
+
+  function clearSubregions()
+  <!-- set all subregions to "no clouds" -->
+  {
+     if (display_subregions == true)
+     {
+        subregions_marked = [];
+        subregions_displayed = [];
+        display_subregions = true;
+        drawPolygons();
+     }
+  }
+  
+  function drawPolygons()
+  <!-- draw one polygon on the image -->
+  {
+     img = document.getElementById("img");
+     cnvs = document.getElementById("cnvs");
+     ctx = cnvs.getContext("2d");
+     ctx.fillStyle = "rgba(255, 255, 0, 0.2)";
+     <!-- clear canvas -->
+     ctx.clearRect(0, 0, cnvs.width, cnvs.height);
+
+     ctx.beginPath();
+     for (i=0; i < subregions_displayed.length; i++)
+     {
+        var x = polygons_x[subregions_displayed[i]];
+        var y = polygons_y[subregions_displayed[i]];
+        ctx.moveTo(x[0], y[0]);
+        for (j = 1; j < x.length; j++)
+        {
+           ctx.lineTo(x[j], y[j]);
+        }
+     }
+     ctx.closePath();
+     ctx.fill();
+
+     //document.getElementById("info").innerHTML = subregions_displayed;      			
+  }
+
+  function displaySubregions()
+  {
+    if (display_subregions == false)
+    {
+	display_subregions = true;
+	subregions_displayed = subregions_marked;		
+    }
+    else
+    {
+       subregions_displayed = [];			
+       display_subregions = false;
+    }
+
+    drawPolygons();
+  }
+
+  function clickSubregion(sub, vortices)
+  <!-- process a click on a subregion -->
+  {
+    if (display_subregions == true)
+    {
+
+       <!-- add or remove subregion index and polygon data-->
+       var id = subregions_marked.indexOf(sub)
+       if (id > -1)
+       {
+	  <!-- remove subregion from list -->
+	  subregions_marked.splice(id, 1);
+       } else {
+	  <!-- add subregion to list -->
+	  subregions_marked.push(sub);
+       }
+
+       subregions_displayed = subregions_marked;
+	  
+       <!-- redraw subregions -->
+       drawPolygons();
+    }
+  }
+			
+  window.onload = drawPolygons;
+       
+</script>
+
+<div class="content">
+  <div class="container">
+    <div class="main">
+
+      <!-- display image --> 
+      <img id="img" usemap="#cam" src="{{ MEDIA_URL }}{{ filearchivepath }}" style="position:absolute;z-index:1">
+      <canvas id="cnvs" width="465px" height="460px" style="position:relative;z-index:2;pointer-events:none;"></canvas>
+
+       <!-- build map -->
+      <map name="cam">
+	{% for xy in polygons_xy %}    
+	<area shape="poly" coords="{{ xy }}"
+  	      onmousedown="clickSubregion({{ forloop.counter|add:"-1" }}, [{{ xy }}])"/>
+	{% endfor %}
+      </map>
+     
+
+      <p style="margin-bottom:10px" id="debug_out"></p>
+
+      <p><button onclick="displaySubregions()" align="right">toggle subregions</button>
+      </p>
+      <p>
+	<button onclick="clearSubregions()" align="right">clear subregions</button>
+
+	<!-- build invert button -->
+	<button onclick="{% for xy in polygons_xy %}
+			 clickSubregion({{ forloop.counter|add:"-1" }}, {{ xy }});
+                         {% endfor %}">invert subregions</button>	
+      </p>
+      <p>
+	 <button type="submit" id="done" class="save btn btn-default">submit</button>
+	 <script>
+	    $(document).ready(function(){
+	    $("#done").click(function(){
+	    <!-- concatenate subregions as string -->
+	    var subregions_str = "";
+	    for (i=0; i < subregions_marked.length; i++)
+	    {
+	       subregions_str += subregions_marked[i] + ",";
+	    }
+	    subregions_str = subregions_str.substring(0, subregions_str.length - 1);
+
+	    <!-- send unlabeled_id and subregion list per GET -->
+	    $.get("/assignLabels/",
+	    {
+	       id: {{ unlabeled_id }},
+               clouds: subregions_str,
+	    },
+	    function(data,status){
+	       <!-- if done, provide a new image to classify to the user -->
+	       window.location.href = "/label/";
+	    });
+	   });
+	 });
+	 </script>
+      </p>
+      
+    </div>
+
+    <div id="info"></div>
+
+    
+    <div class="aside">
+
+      <p> <strong>Image File:</strong><br>{{ filearchivepath }} </p>
+      
+      <p> <strong>Date and Time</strong> (UT):<br> {{ date }} </p>
+
+      {% if sunalt > -18 %}
+	<p style="color:red"> Sun: {{ sunalt }}°</p>
+      {% else %}
+	<p style="color:lightgreen"> Sun: {{ sunalt }}°</p>
+      {% endif %}
+
+
+      {% if moonalt > -5 %}
+	<p style="color:red"> Moon: {{ moonalt }}° / {{ moonphase }}%</p>
+      {% else %}
+	<p style="color:lightgreen"> Moon: {{ moonalt }}° / {{ moonphase }}%</p>
+      {% endif %}
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+
+
+{% endblock %}

@@ -21,13 +21,18 @@ class ConfExample():
         # define base directory structure
         # each directory gets `AllskyCamera.night` appended
         # [here, directories are defined relative to the scripts/ directory]
-        self.DIR_BASE = '../'
+
+        self.DIR_BASE = os.path.join(
+            ' ', *os.path.abspath(__file__).split('/')[:-2]).strip()
+        # location of module base (for example data)
+
         self.DIR_RAW = os.path.join(self.DIR_BASE, 'example_data')
+
         self.DIR_ARCHIVE = os.path.join(self.DIR_BASE, 'workbench')
 
         # data directory location on host machine (where to pull FITS files from)
-        self.HOST_NAME = 'XXX'
-        self.HOST_BASEDIR = 'XXX'
+        self.CAMHOST_NAME = ''
+        self.CAMHOST_BASEDIR = ''
 
         # FITS file prefix and suffix used by allsky images
         self.FITS_PREFIX = ''
@@ -61,20 +66,18 @@ class ConfExample():
         self.THUMBNAIL_SCALE = ZScaleInterval
 
         # mask file
-        self.MASK_FILENAME = os.path.join(self.DIR_RAW, 'mask.fits')
+        self.MASK_FILENAME = os.path.abspath(os.path.join(self.DIR_RAW,
+                                                       'mask.fits'))
 
         # database URL and credentials
-        self.DB_URL = 'http://localhost/dct/'
-        #self.DB_URL = 'http://127.0.0.1:8000/dct/'        
+        self.DB_URL = 'http://127.0.0.1:8000/'
         self.DB_USER = 'writer'
-        self.DB_PWD = 'writelo-clouds'
+        self.DB_PWD = 'writecloud'
 
         # url for retrieving training data
-        #self.TRAINDATA_URL = 'http://lo-clouds.lowell.edu/dct/get_trained'
-        self.TRAINDATA_URL = 'http://localhost/dct/get_trained'
-        self.UNTRAINDATA_URL = 'http://localhost/dct/get_untrained'  
-        # self.UNTRAINDATA_URL = 'http://127.0.0.1:8000/dct/get_untrained'
-        
+        self.TRAINDATA_URL = 'http://127.0.0.1:8000/getAllLabeled/'
+        self.UNTRAINDATA_URL = 'http://127.0.0.1:8000/getAllUnlabeled/'
+
         self.LGBMODEL_PARAMETERS = {
             'max_depth': 5,
             'n_estimators': 500,
@@ -93,8 +96,10 @@ class ConfExample():
             'min_child_samples': randint(low=10, high=190),
             'reg_alpha': [1, 5, 10, 50, 100],
             'reg_lambda': [1, 5, 10, 50, 100, 500, 1000]}
-        
-        
+
+        self.LGBMODEL_FILE = os.path.join(self.DIR_ARCHIVE,
+                                             'lightgbm.pickle')
+
     def update_directories(self, night):
         """prepare directory structure for a given night, provided as string
            in the form "%Y%m%d"""

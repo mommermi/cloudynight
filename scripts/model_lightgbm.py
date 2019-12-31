@@ -8,10 +8,10 @@ of the database.
 
 (c) 2020, Michael Mommert (mommermiscience@gmail.com)
 """
-import cloudynight
+from cloudynight import LightGBMModel
 
 # initialize model
-model = cloudynight.LightGBMModel()
+model = LightGBMModel()
 
 # load feature example data
 model.load_data('../example_data/features/fulltrainingsample_features.dat')

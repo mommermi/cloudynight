@@ -40,7 +40,7 @@ for subi in range(len(cam.subregions)):
 # # !!! this part of the script will only work if the webapp is setup properly
 #
 # # setup server credentials
-# url = 'http://127.0.0.1:8000/cam/data/Subregions/' # for use with test server
+# url = conf.HOST_NAME+conf.HOST_BASEDIR+'data/Subregion/' # for use with test server
 # user = 'writer'
 # pwd = '' # add password here
 #
@@ -53,6 +53,7 @@ for subi in range(len(cam.subregions)):
 #     print('uploading subregion', subi)
 #
 #     # scale polygon coordinates to image size used in webapp
+#     # factors at the end are image sizes used in the webapp
 #     x = cam.polygons[subi][0]/cam.maskdata.data.shape[0]*460
 #     y = cam.polygons[subi][1]/cam.maskdata.data.shape[1]*465
 #

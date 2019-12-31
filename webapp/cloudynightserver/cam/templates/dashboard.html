@@ -1,0 +1,65 @@
+<!-- Licensed under a 3-clause BSD style license - see LICENSE.rst -->
+
+<!-- This file is part of -->
+<!-- cloudynight (c) Michael Mommert (mommermiscience@gmail.com), 2020 -->
+
+<!-- This file can be copied directly into your Django project. -->
+
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<div class="content">
+  <div class="container">
+    <div class="main">
+
+      <h1>Cloudynight Dashboard</h1>
+
+      <h2> Data Overview</h2>
+      <p style="color:royalblue">unlabeled images: {{ n_unlabeled }}</p>
+      <p style="color:red">labeled images: {{ n_labeled }}</p>
+      <p>labeled subregion total: {{ n_labeled_cloudy|add:n_labeled_clear }} ({{ n_labeled_cloudy }} with clouds, {{ n_labeled_clear }} without clouds)</p>
+
+      <h2> Data Coverage</h2>
+
+      <p>Every data point displayed here represents one image.</p>
+      
+      <h3>Date</h3>
+      <p>
+      {{ date_div | safe }}
+      </p>
+      {{ date_script | safe }}
+            
+      <h3>Solar Elevation</h3>
+      <p>
+      {{ sunalt_div | safe }}
+      </p>
+      {{ sunalt_script | safe }}
+      
+      <h3>Lunar Elevation</h3>
+      <p>
+      {{ moonalt_div | safe }}
+      </p>
+      {{ moonalt_script | safe }}
+      
+      <h3>Lunar Illumination</h3>
+      <p>
+	{{ moonphase_div | safe }}
+      </p>
+      {{ moonphase_script | safe }}
+
+      <h2> Labeling Statistics</h2>
+
+      <h3>Labeling Frequency</h3>
+      <p>
+	{{ labeling_div | safe }}
+      </p>
+      {{ labeling_script | safe }}
+            
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+

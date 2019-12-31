@@ -287,7 +287,7 @@ class AllskyImage():
             return None
 
         post_request = session.post(
-            conf.DB_URL+'data/Unlabeled/',       ## XXX was Untrained
+            conf.DB_URL+'data/Unlabeled/',
             headers=post_headers, auth=(conf.DB_USER, conf.DB_PWD),
             json=data)
 
@@ -332,8 +332,8 @@ class AllskyCamera():
 
         # build rsync command
         commandline = 'rsync -avr {}:{} {}'.format(
-            conf.HOST_NAME,
-            os.path.join(conf.HOST_BASEDIR, self.night,
+            conf.CAMHOST_NAME,
+            os.path.join(conf.CAMHOST_BASEDIR, self.night,
                          '*.{}'.format(conf.FITS_SUFFIX)), conf.DIR_RAW)
 
         # download data
@@ -535,10 +535,6 @@ class AllskyCamera():
         arrays, each with the same dimensions as self.maskdata.
         """
 
-        conf.logger.info(
-            'creating subregions: {} rings and {} ring segments'.format(
-                conf.N_RINGS, conf.N_RINGSEGMENTS))
-        
         shape = np.array(self.maskdata.data.shape)
         center_coo = shape/2
         radius_borders = np.linspace(0, min(shape)/2,
@@ -601,8 +597,6 @@ class LightGBMModel():
         self.val_score = None   # model validation sample score
         self.f1_score_val = None  # model validation sample f1 score
 
-        conf.setupLogger()
-        
     def retrieve_training_data(self, size_limit=None):
         """Retrieves feature data from webapp database."""
         n_subregions = conf.N_RINGS*conf.N_RINGSEGMENTS+1
@@ -611,7 +605,7 @@ class LightGBMModel():
         if get.status_code != requests.codes.ok:
             raise ServerError('could not retrieve training data from server')
         raw = pd.DataFrame(get.json())
-        
+
         data = pd.DataFrame()
         for j in range(len(raw['moonalt'])):
             frame = pd.DataFrame(OrderedDict(
@@ -637,10 +631,6 @@ class LightGBMModel():
         self.data_X = data.drop(['cloudy'], axis=1)
         self.data_y = np.ravel(data.loc[:, ['cloudy']].values).astype(int)
         self.data_X_featurenames = data.drop(['cloudy'], axis=1).columns.values
-        
-        conf.logger.info(
-            '{} training subregion data points retrieved from database'.format(
-                len(self.data_y)))
 
         # limit data set size to size_limit subregions
         if size_limit is not None:
@@ -659,23 +649,14 @@ class LightGBMModel():
         self.data_y = np.ravel(data.loc[:, ['cloudy']].values).astype(int)
         self.data_X_featurenames = data.drop(['cloudy'], axis=1).columns.values
 
-        conf.logger.info(
-            '{} training subregion data points retrieved from file'.format(
-                len(self.data_y)))
-
         return len(self.data_y)
 
     def train(self, parameters=conf.LGBMODEL_PARAMETERS, cv=5):
         """Train """
 
-        conf.logger.info('training model with parameters {}'.format(
-            parameters))
-
         # split data into training and validation sample
         X_cv, X_val, y_cv, y_val = train_test_split(
             self.data_X, self.data_y, test_size=0.1, random_state=42)
-        conf.logger.info('splitting off validation sample: {}/{}'.format(
-            len(y_cv), len(y_val)))
 
         # define model
         lgb = LGBMClassifier(objective='binary', random_state=42,
@@ -692,12 +673,6 @@ class LightGBMModel():
         self.parameters = parameters
         self.val_score = self.model.score(X_val, y_val)
         self.f1_score_val = f1_score(y_val, self.model.predict(X_val))
-        conf.logger.info('training sample accuracy: {}'.format(
-            self.train_score))
-        conf.logger.info('test sample accuracy: {}'.format(
-            self.test_score))
-        conf.logger.info('validation sample accuracy: {}'.format(
-            self.val_score))
 
         return self.val_score
 
@@ -707,14 +682,10 @@ class LightGBMModel():
         cv=3, scoring="accuracy"):
         """Train the lightGBM model using a combined randomized
         cross-validation search."""
-        conf.logger.info('running randomizedsearch_cv with distributions: {}'.format(
-            distributions))
 
         # split data into training and validation sample
         X_grid, X_val, y_grid, y_val = train_test_split(
             self.data_X, self.data_y, test_size=0.1, random_state=42)
-        conf.logger.info('splitting off validation sample: {}/{}'.format(
-            len(y_grid), len(y_val)))
 
         # initialize model
         lgb = LGBMClassifier(objective='binary', random_state=42, n_jobs=-1)
@@ -725,12 +696,9 @@ class LightGBMModel():
 
         # fit model
         lgbrand.fit(X_grid, y_grid)
-        conf.logger.info('randomizedsearch_cv: {}'.format(lgbrand))
 
         self.cv_results = lgbrand.cv_results_
-        
         self.model = lgbrand.best_estimator_
-        conf.logger.info('best estimator: {}'.format(self.model))
 
         # derive scores
         self.train_score = lgbrand.cv_results_['mean_train_score'][lgbrand.best_index_]
@@ -738,66 +706,22 @@ class LightGBMModel():
         self.parameters = lgbrand.cv_results_['params'][lgbrand.best_index_]
         self.val_score = self.model.score(X_val, y_val)
         self.f1_score_val = f1_score(y_val, self.model.predict(X_val))
-        conf.logger.info('training sample accuracy: {}'.format(
-            self.train_score))
-        conf.logger.info('test sample accuracy: {}'.format(
-            self.test_score))
-        conf.logger.info('validation sample accuracy: {}'.format(
-            self.val_score))
 
         return self.val_score
 
-    def write_model(self, filename):
+    def write_model(self,
+                    filename=os.path.join(conf.DIR_ARCHIVE+'model.pickle')):
         """Write trained model to file."""
-        conf.logger.info('writing model to file {}'.format(filename))
         self.filename = filename
         dump(self.model, filename)
 
-    def read_model(self, filename):
+    def read_model(self,
+                   filename=os.path.join(conf.DIR_ARCHIVE+'model.pickle')):
         """Read trained model from file."""
-        conf.logger.info('reading model from file {}'.format(filename))
         self.filename = filename
         self.model = load(filename)
         
     def predict(self, X):
         """Predict cloud coverage for feature data."""
-        conf.logger.info('predict clouds for {} data point'.format(
-            len(X)))
         return self.model.predict(X)
 
-    def upload(self):
-        """Upload model parameters and filename to database."""
-        conf.logger.info('upload model parameters to database')
-        
-        data = OrderedDict((
-            ('filearchivepath', self.filename),
-            ('n_train', self.data_X.shape[0]),
-            ('train_score', self.train_score),
-            ('test_score', self.test_score),            
-            ('learning_rate', self.model.learning_rate),
-            ('max_depth', self.model.max_depth),
-            ('min_child_samples', self.model.min_child_samples),
-            ('min_child_weight', self.model.min_child_weight),
-            ('min_split_gain', self.model.min_split_gain),
-            ('n_estimators', self.model.n_estimators),
-            ('num_leaves', self.model.num_leaves),
-            ('reg_alpha', self.model.reg_alpha),
-            ('reg_lambda', self.model.reg_lambda),
-            ('subsample', self.model.subsample),
-            ('subsample_for_bin', self.model.subsample_for_bin),
-            ('subsample_freq', self.model.subsample_freq)))
-
-        session = requests.Session()
-        post_headers = {'Content-Type': 'application/json'}
-
-        post_request = session.post(
-            conf.DB_URL+'data/LGBModel/', headers=post_headers,
-            auth=(conf.DB_USER, conf.DB_PWD), json=data)
-
-        if not ((post_request.status_code == requests.codes.ok) or
-                (post_request.status_code == requests.codes.created)):
-            raise ServerError(
-                'could not upload model with error code {}.'.format(
-                    post_request.status_code))
-
-        conf.logger.info('model upload succeeded')
