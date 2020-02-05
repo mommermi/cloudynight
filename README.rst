@@ -19,6 +19,30 @@ Please that ``cloudynight`` only utilizes the more efficient ``lightgbm``
 classifier. The ResNet code is also included in ``scripts/`` for the sake
 completeness.
 
+Requirements
+------------
+
+``cloudynight`` requires the following Python modules to be available
+(version numbers in parentheses signify the version numbers that were used in
+building this code):
+
+* numpy (1.16.3)
+* scipy (1.2.1)
+* matplotlib (3.0.3)
+* pandas (0.25.3)
+* sep (1.0.3)
+* astropy (4.0)
+* scikit-image (0.15.0)    
+* lightgbm (2.2.3)
+* scikit-learn (0.22.1)  
+* astroplan (0.4)
+
+The use of the ResNet implementation requires additional modules:
+
+* pytorch (1.3.1)
+* tqdm (4.36.1)
+
+  
 Use
 ---
 

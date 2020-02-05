@@ -15,5 +15,7 @@ The following example scripts are included here:
 * ``resnet.py``: train the ResNet model and derive accuracy scores
 
 All these example scripts are intended to work with the example data
-provided. However, it should not be hard to modify the scripts to work with
+provided and should be run in this order.
+
+It should not be hard to modify these scripts to work with
 data from other all-sky cameras.
