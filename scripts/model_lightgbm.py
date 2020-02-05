@@ -9,6 +9,7 @@ of the database.
 (c) 2020, Michael Mommert (mommermiscience@gmail.com)
 """
 from cloudynight import LightGBMModel
+from sklearn.metrics import confusion_matrix
 
 # initialize model
 model = LightGBMModel()
@@ -29,7 +30,16 @@ model.write_model('../workbench/lightgbm.pickle')
 # the training data set
 i = 12345
 print('Is there a cloud in training example {}? {}.'.format(
-    i, model.data_y[i]==1))
+    i, model.data_y[i] == 1))
 print('The lightgbm model finds {} cloud in this subregion.'.format(
     {1: 'a', 0: 'no'}[
         model.predict(model.data_X.iloc[i].values.reshape(1, -1))[0]]))
+
+# build confusion matrix
+print('confusion matrix:')
+cm = confusion_matrix(model.data_y,
+                      model.predict(model.data_X.values),
+                      normalize='true')
+tn, fp, fn, tp = cm.ravel()
+print(('true positives: {}\nfalse positives: {}\n'
+       'false negatives: {}\ntrue negatives: {}').format(tn, fp, fn, tp))
