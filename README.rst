@@ -1,6 +1,10 @@
 Cloudynight - The All-sky Camera Cloud Detector
 ===============================================
 
+
+.. image:: https://zenodo.org/badge/230988144.svg
+   :target: https://zenodo.org/badge/latestdoi/230988144
+
 This repository contains code built for
 `Mommert (2020) <http://doi.org/10.3847/1538-3881/ab744f>`_:
 *Cloud Identification from All-sky Camera Data with Machine Learning*
