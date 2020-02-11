@@ -1,8 +1,11 @@
 Cloudynight - The All-sky Camera Cloud Detector
 ===============================================
 
-This repository contains code built for Mommert (2020): `Cloud Identification
-from All-sky Camera Data with Machine Learning`, submitted
+This repository contains code built for
+`Mommert (2020) <http://doi.org/10.3847/1538-3881/ab744f>`_:
+`Cloud Identification
+from All-sky Camera Data with Machine Learning` in The Astronomical Journal.
+For details on ``cloudynight``, please refer to this publication.
 
 The system consists of several parts:
 
@@ -76,8 +79,9 @@ using the web API with task ``predictLatestUnlabeled``.
 Citing cloudynight
 ------------------
 
-You can reference Mommert (2020): `Cloud Identification
-from All-sky Camera Data with Machine Learning`, submitted.
+If you decide to use code elements from this repository, please reference
+`Mommert (2020) <http://doi.org/10.3847/1538-3881/ab744f>`_: `Cloud Identification
+from All-sky Camera Data with Machine Learning` in The Astronomical Journal
 
 Acknowledgements
 ----------------
